@@ -173,6 +173,7 @@
       text-align: right;
     }
     thead th:first-child { text-align: left; }
+    thead th:not(:first-child) { padding-left: 24px; }
 
     tbody td {
       padding: 12px 0;
@@ -187,13 +188,14 @@
       color: var(--muted);
       padding-right: 8px;
     }
+    tbody td:not(:first-child) { padding-left: 24px; }
 
     tr.row-start td { border-top: none; padding-top: 2px; }
     tr.row-start td:not(:first-child) { color: var(--muted); }
 
     .pos   { color: var(--green); font-weight: 600; }
     .neg   { color: var(--red);   font-weight: 500; }
-    .dash  { color: var(--muted); }
+    .dash  { color: var(--muted); text-align: center; }
 
     tr.row-total td {
       border-top: 2px solid var(--text);
@@ -263,8 +265,8 @@
       <thead>
         <tr>
           <th></th>
-          <th>Deposit</th>
-          <th>Withdrawal</th>
+          <th>(+)</th>
+          <th>(−)</th>
           <th>Balance</th>
         </tr>
       </thead>
@@ -297,7 +299,7 @@
 
     get('tbody').innerHTML = `
       <tr class="row-start">
-        <td>Starting Balance</td>
+        <td>Starting</td>
         <td class="dash">—</td>
         <td class="dash">—</td>
         <td>${money(balance)}</td>
