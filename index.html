@@ -195,7 +195,7 @@
 
     .pos   { color: var(--green); font-weight: 600; }
     .neg   { color: var(--red);   font-weight: 500; }
-    .dash  { color: var(--muted); text-align: center; }
+    .dash  { color: var(--muted); }
 
     tr.row-total td {
       border-top: 2px solid var(--text);
@@ -305,7 +305,7 @@
         <td>${money(balance)}</td>
       </tr>
       <tr>
-        <td>Interest <small style="font-size:.75rem;opacity:.7">(5%/yr)</small></td>
+        <td>Interest</td>
         <td class="pos">${money(interest)}</td>
         <td class="dash">—</td>
         <td>${money(bal1)}</td>
