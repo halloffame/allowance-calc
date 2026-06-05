@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Allowance">
+  <meta name="theme-color" content="#059669">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <title>Allowance Calc</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:      #059669;
+      --green-lt:   #10b981;
+      --green-bg:   #ecfdf5;
+      --red:        #dc2626;
+      --card:       #ffffff;
+      --text:       #111827;
+      --muted:      #6b7280;
+      --border:     #e5e7eb;
+      --shadow:     0 1px 3px rgba(0,0,0,.07), 0 4px 14px rgba(0,0,0,.05);
+      --r:          14px;
+    }
+
+    html { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+      background: var(--green-bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      padding-top: env(safe-area-inset-top, 0);
+      padding-right: env(safe-area-inset-right, 0);
+      padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+      padding-left: env(safe-area-inset-left, 0);
+    }
+
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 28px 16px 0;
+    }
+
+    /* ── header ── */
+    header { text-align: center; margin-bottom: 26px; }
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -.02em;
+    }
+    header p {
+      color: var(--muted);
+      font-size: .875rem;
+      margin-top: 4px;
+    }
+
+    /* ── card ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--r);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    /* ── fields ── */
+    .field { margin-bottom: 14px; }
+    .field:last-of-type { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--green-bg);
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .input-wrap:focus-within { border-color: var(--green); }
+
+    .sym {
+      padding: 0 2px 0 14px;
+      font-size: 1.1rem;
+      color: var(--muted);
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .unit {
+      padding: 0 14px 0 2px;
+      font-size: .85rem;
+      color: var(--muted);
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 14px 14px;
+      font-size: 1.15rem;
+      font-family: inherit;
+      color: var(--text);
+      -webkit-appearance: none;
+      min-width: 0;
+    }
+    input[type="number"]:focus { outline: none; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { opacity: .5; }
+
+    /* ── buttons ── */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: inherit;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: filter .15s, transform .1s;
+    }
+    .btn:active { transform: scale(.97); }
+
+    .btn-calc {
+      background: var(--green);
+      color: #fff;
+      margin-top: 20px;
+    }
+    .btn-calc:hover { filter: brightness(1.07); }
+
+    .btn-clear {
+      background: var(--border);
+      color: var(--text);
+      margin-top: 14px;
+    }
+    .btn-clear:hover { filter: brightness(.95); }
+
+    /* ── results ── */
+    #results { display: none; }
+    #results.show { display: block; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 10px;
+      text-align: right;
+    }
+    thead th:first-child { text-align: left; }
+
+    tbody td {
+      padding: 12px 0;
+      font-size: .9375rem;
+      text-align: right;
+      border-top: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tbody td:first-child {
+      text-align: left;
+      font-size: .875rem;
+      color: var(--muted);
+      padding-right: 8px;
+    }
+
+    tr.row-start td { border-top: none; padding-top: 2px; }
+    tr.row-start td:not(:first-child) { color: var(--muted); }
+
+    .pos   { color: var(--green); font-weight: 600; }
+    .neg   { color: var(--red);   font-weight: 500; }
+    .dash  { color: var(--muted); }
+
+    tr.row-total td {
+      border-top: 2px solid var(--text);
+      font-weight: 700;
+      padding-top: 14px;
+    }
+    tr.row-total td:not(:first-child) { color: var(--green); }
+
+    .new-bal {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--green-bg);
+      border-radius: 10px;
+      text-align: center;
+    }
+    .new-bal-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .new-bal-value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -.02em;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>Allowance Calc</h1>
+    <p>5% annual interest · $1/year allowance</p>
+  </header>
+
+  <div class="card">
+    <div class="field">
+      <label>Current Balance</label>
+      <div class="input-wrap">
+        <span class="sym">$</span>
+        <input id="balance" type="number" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+    <div class="field">
+      <label>Age</label>
+      <div class="input-wrap">
+        <input id="age" type="number" inputmode="numeric" placeholder="0" min="0" max="25" step="1" style="padding-left:14px">
+        <span class="unit">yrs</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Amount to Keep</label>
+      <div class="input-wrap">
+        <span class="sym">$</span>
+        <input id="keep" type="number" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+    <button class="btn btn-calc" onclick="calc()">Calculate</button>
+  </div>
+
+  <div class="card" id="results">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Deposit</th>
+          <th>Withdrawal</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="new-bal">
+      <div class="new-bal-label">New Balance</div>
+      <div class="new-bal-value" id="new-bal-value"></div>
+    </div>
+    <button class="btn btn-clear" onclick="reset()">Clear for Next Kid</button>
+  </div>
+
+</div>
+<script>
+  const get = id => document.getElementById(id);
+
+  function money(n) {
+    return '$' + n.toFixed(2);
+  }
+
+  function calc() {
+    const balance  = parseFloat(get('balance').value) || 0;
+    const age      = parseInt(get('age').value)       || 0;
+    const keep     = parseFloat(get('keep').value)    || 0;
+
+    const interest = parseFloat((balance * 0.05 / 12).toFixed(2));
+    const bal1     = parseFloat((balance + interest).toFixed(2));
+    const allowance = age;
+    const bal2     = parseFloat((bal1 + allowance - keep).toFixed(2));
+
+    get('tbody').innerHTML = `
+      <tr class="row-start">
+        <td>Starting Balance</td>
+        <td class="dash">—</td>
+        <td class="dash">—</td>
+        <td>${money(balance)}</td>
+      </tr>
+      <tr>
+        <td>Interest <small style="font-size:.75rem;opacity:.7">(5%/yr)</small></td>
+        <td class="pos">${money(interest)}</td>
+        <td class="dash">—</td>
+        <td>${money(bal1)}</td>
+      </tr>
+      <tr class="row-total">
+        <td>Allowance</td>
+        <td class="pos">${money(allowance)}</td>
+        <td class="${keep > 0 ? 'neg' : 'dash'}">${keep > 0 ? money(keep) : '—'}</td>
+        <td>${money(bal2)}</td>
+      </tr>
+    `;
+
+    get('new-bal-value').textContent = money(bal2);
+
+    const el = get('results');
+    el.classList.add('show');
+    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  }
+
+  function reset() {
+    ['balance', 'age', 'keep'].forEach(id => get(id).value = '');
+    get('results').classList.remove('show');
+    get('balance').focus();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') calc();
+  });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
